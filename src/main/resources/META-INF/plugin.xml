@@ -1,0 +1,29 @@
+<idea-plugin>
+    <id>com.example.SPP-3</id>
+
+    <name>SPP-3</name>
+
+    <vendor email="support@yourcompany.com" url="https://www.yourcompany.com">STech Solutions</vendor>
+
+    <description>S++ language plugin: analysis and execution</description>
+
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.java</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <fileType
+            name="S++ File"
+            implementationClass="org.intellij.sdk.language.SppFileType"
+            fieldName="INSTANCE"
+            language="S++"
+            extensions="spp"/>
+
+        <lang.parserDefinition
+            language="S++"
+            implementationClass="org.intellij.sdk.language.SppParserDefinition"/>
+
+        <lang.syntaxHighlighterFactory
+            language="S++"
+            implementationClass="org.intellij.sdk.language.SppSyntaxHighlighterFactory"/>
+    </extensions>
+</idea-plugin>

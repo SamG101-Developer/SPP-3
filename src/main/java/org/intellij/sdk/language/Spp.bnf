@@ -1,0 +1,280 @@
+{
+    parserClass="org.intellij.sdk.language.SppParser"
+    extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
+
+    psiClassPrefix="Spp"
+    psiImplClassSuffix="Impl"
+    psiPackage="org.intellij.sdk.language.psi"
+    psiImplPackage="org.intellij.sdk.language.psi.impl"
+
+    elementTypeHolderClass="org.intellij.sdk.language.psi.SppTypes"
+    elementTypeClass="org.intellij.sdk.language.psi.SppElementType"
+    tokenTypeClass="org.intellij.sdk.language.psi.SppTokenType"
+
+    tokens = [
+        line_comment = "regexp:#.*"
+        block_comment = "regexp:/\*([^*]|\*[^/])*\*/"
+        newline = "regexp:\n"
+        space = "regexp:\s+"
+
+        TK_LOGICAL_AND = "&&"
+        TK_LOGICAL_AND_ASSIGN = "&&="
+        TK_LOGICAL_OR = "||"
+        TK_LOGICAL_OR_ASSIGN = "||="
+
+        TK_BIT_AND = "&"
+        TK_BIT_AND_ASSIGN = "&="
+        TK_BIT_OR = "|"
+        TK_BIT_OR_ASSIGN = "|="
+        TK_BIT_XOR = "^"
+        TK_BIT_XOR_ASSIGN = "^="
+        TK_BIT_SHIFT_LEFT = "<<"
+        TK_BIT_SHIFT_LEFT_ASSIGN = "<<="
+        TK_BIT_SHIFT_RIGHT = ">>"
+        TK_BIT_SHIFT_RIGHT_ASSIGN = ">>="
+        TK_BIT_ROTATE_LEFT = "<<<"
+        TK_BIT_ROTATE_LEFT_ASSIGN = "<<<="
+        TK_BIT_ROTATE_RIGHT = ">>>"
+        TK_BIT_ROTATE_RIGHT_ASSIGN = ">>>="
+
+        TK_EQ = "=="
+        TK_NE = "!="
+        TK_GE = ">="
+        TK_LE = "<="
+        TK_GT = ">"
+        TK_LT = "<"
+        TK_SS = "<=>"
+
+        TK_ADD = "+"
+        TK_ADD_ASSIGN = "+="
+        TK_SUB = "-"
+        TK_SUB_ASSIGN = "-="
+        TK_MUL = "*"
+        TK_MUL_ASSIGN = "*="
+        TK_DIV = "/"
+        TK_DIV_ASSIGN = "/="
+        TK_REM = "%"
+        TK_REM_ASSIGN = "%="
+        TK_MOD = "%%"
+        TK_MOD_ASSIGN = "%%="
+        TK_POW = "**"
+        TK_POW_ASSIGN = "**="
+
+        TK_PAREN_L = "("
+        TK_PAREN_R = ")"
+        TK_BRACK_L = "["
+        TK_BRACK_R = "]"
+        TK_BRACE_L = "{"
+        TK_BRACE_R = "}"
+
+        TK_COALESCE = "??"
+        TK_COALESCE_ASSIGN = "??="
+
+        TK_QST = "?"
+        TK_VARIADIC = ".."
+        TK_COLON = ":"
+
+        TK_DOT = "."
+        TK_COMMA = ","
+        TK_ASSIGN = "="
+        TK_ARROW_R = "->"
+        TK_AT = "@"
+
+        KW_MOD = "mod"
+        KW_CLS = "cls"
+        KW_SUP = "sup"
+        KW_FUN = "fun"
+        KW_USE = "use"
+
+        KW_LET = "let"
+        KW_MUT = "mut"
+
+        KW_IF = "if"
+        KW_ELSE = "else"
+        KW_WHILE = "while"
+        KW_WITH = "with"
+
+        KW_RET = "ret"
+        KW_YIELD = "yield"
+        KW_WHERE = "where"
+
+        KW_IS = "is"
+        KW_AS = "as"
+
+        KW_TRUE = "true"
+        KW_FALSE = "false"
+        KW_SELF = "self"
+        KW_SELF_TYPE = "Self"
+
+        KW_ON = "on"
+        KW_ASYNC = "async"
+
+        LX_REGEX = "regexp:r\"[^\"]*\""
+        LX_IDENTIFIER = "regexp:[a-z_][a-z0-9_]*"
+        LX_UPPER_IDENTIFIER = "regexp:[A-Z][a-zA-Z0-9_]*"
+        LX_BIN_DIGITS = "regexp:0b[01]+"
+        LX_HEX_DIGITS = "regexp:0x[0-9a-f]+"
+        LX_DEC_DIGITS = "regexp:[0-9]+(_[0-9]+)*"
+        LX_DEC_FLOAT = "regexp:[0-9]+(_[0-9]+)*\.[0-9]+(_[0-9]+)*"
+        LX_DOUBLE_QUOTE_STR = "regexp:\"[^\"]*\""
+    ]
+}
+
+Program ::= ModulePrototype <<eof>>
+
+ModulePrototype ::= Annotation* KW_MOD ModuleIdentifier ModuleImplementation
+ModuleImplementation ::= ModuleMember*
+ModuleMember ::= FunctionPrototype | ClassPrototype | SupPrototypeNormal | SupPrototypeInheritance | TypedefStatement
+ModuleIdentifier ::= (Identifier TK_DOT)* Identifier
+
+ClassPrototype ::= Annotation* KW_CLS UpperIdentifier GenericParameters? WhereBlock? ClassImplementation
+ClassImplementation ::= TK_BRACE_L (ClassAttribute newline)* TK_BRACE_R
+ClassAttribute ::= Annotation* Identifier TK_COLON Type
+
+SupPrototypeNormal ::= KW_SUP GenericParameters? Type WhereBlock? SupImplementation
+SupPrototypeInheritance ::= KW_SUP GenericParameters? Type KW_ON Type WhereBlock? SupImplementation
+SupImplementation ::= TK_BRACE_L (SupMember newline)* TK_BRACE_R
+SupMember ::= SupMethodPrototype | SupTypedef
+SupMethodPrototype ::= FunctionPrototype
+SupTypedef ::= Annotation* TypedefStatement
+
+FunctionPrototype ::= Annotation* KW_FUN Identifier GenericParameters? FunctionParameters TK_ARROW_R Type WhereBlock? FunctionImplementation
+FunctionImplementation ::= TK_BRACE_L (Statement newline)* TK_BRACE_R
+FunctionCallArguments ::= TK_PAREN_L FunctionCallArgument* TK_PAREN_R
+FunctionCallArgument ::= FunctionCallArgumentNamed | FunctionCallArgumentNormal
+FunctionCallArgumentNamed ::= Identifier TK_ASSIGN Convention Expression
+FunctionCallArgumentNormal ::= Convention TK_VARIADIC? Expression
+FunctionParameters ::= TK_PAREN_L FunctionParameter* TK_PAREN_R
+FunctionParameter ::= FunctionParameterVariadic | FunctionParameterOptional | FunctionParameterRequired | FunctionParameterSelf
+FunctionParameterVariadic ::= TK_VARIADIC FunctionParameterRequired
+FunctionParameterOptional ::= FunctionParameterRequired TK_ASSIGN Expression
+FunctionParameterRequired ::= KW_MUT? Identifier TK_COLON Convention Type
+FunctionParameterSelf ::= KW_MUT? Convention KW_SELF
+
+GenericArguments ::= TK_BRACK_L (GenericArgument TK_COMMA)* GenericArgument TK_BRACK_R
+GenericArgument ::= GenericArgumentNormal | GenericArgumentNamed
+GenericArgumentNormal ::= Type
+GenericArgumentNamed ::= UpperIdentifier TK_ASSIGN Type
+GenericParameters ::= TK_BRACK_L (GenericParameter TK_COMMA)* GenericParameter TK_BRACK_R
+GenericParameter ::= GenericParameterVariadic | GenericParameterOptional | GenericParameterRequired
+GenericParameterVariadic ::= TK_VARIADIC GenericParameterRequired
+GenericParameterOptional ::= GenericParameterRequired TK_ASSIGN Type
+GenericParameterRequired ::= UpperIdentifier GenericParameterInlineConstraints?
+GenericParameterInlineConstraints ::= TK_COLON (Type TK_BIT_AND)* Type
+
+WhereBlock ::= KW_WHERE WhereBlockConstraintsGroup
+WhereBlockConstraintsGroup ::= TK_BRACK_L (WhereBlockConstraints TK_COMMA)* WhereBlockConstraints TK_BRACK_R
+WhereBlockConstraints ::= (Type TK_COMMA)* Type TK_COLON (Type TK_BIT_AND)* Type
+
+Annotation ::= TK_AT
+Expression ::= BinaryExpression
+BinaryExpression ::= UnaryExpression (BinaryOp BinaryExpression)*
+UnaryExpression ::= UnaryOp* PostfixExpression
+PostfixExpression ::= PrimaryExpression PostfixOp*
+PrimaryExpression ::= Literal | ObjectInitialization | LambdaPrototype | ParenthesizedExpression | Identifier | IfExpression | WhileExpression | YieldExpression | WithExpression | InnerScope | KW_SELF | TK_VARIADIC
+ParenthesizedExpression ::= TK_PAREN_L Expression TK_PAREN_R
+
+IfExpression ::= KW_IF Expression PatternCompOp? IfImplementation
+IfImplementation ::= TK_BRACE_L (PatternStatement newline)* TK_BRACE_R
+WhileExpression ::= KW_WHILE Expression InnerScope ResidualInnerScope?
+YieldExpression ::= KW_YIELD KW_WITH? Convention Expression
+WithExpression ::= KW_WITH WithExpressionLhsAlias Expression InnerScope
+WithExpressionLhsAlias ::= LocalVariable TK_ASSIGN
+
+ReturnStatement ::= KW_RET Expression
+InnerScope ::= TK_BRACE_L (Statement newline*) TK_BRACE_R
+ResidualInnerScope ::= KW_ELSE InnerScope
+Statement ::= TypedefStatement | LetStatement | ReturnStatement | AssignmentStatement | Expression
+
+TypedefStatement ::= KW_USE GenericParameters? TypeNamespace? TypedefItem
+TypedefItem ::= TypedefItemSpecificItem | TypedefItemSpecificItems | TypedefItemAllItems
+TypedefItemSpecificItem ::= Type TypedefItemSpecificItemAlias?
+TypedefItemSpecificItems ::= TK_BRACE_L (TypedefItemSpecificItem newline)* TK_BRACE_R
+TypedefItemAllItems ::= TK_MUL
+TypedefItemSpecificItemAlias ::= TK_AS GenericIdentifier
+
+LetStatement ::= LetStatementInitialized | LetStatementUninitialized
+LetStatementInitialized ::= KW_LET LocalVariable TK_ASSIGN Expression ResidualInnerScope?
+LetStatementUninitialized ::= KW_LET LocalVariable TK_COLON Type
+LocalVariable ::= LocalVariableSingle | LocalVariableTuple | LocalVariableDestructure
+LocalVariableSingle ::= KW_MUT? TK_VARIADIC? Identifier
+LocalVariableTuple ::= TK_PAREN_L (LocalVariable TK_COMMA)* LocalVariable TK_PAREN_R
+LocalVariableDestructure ::= Type TK_BRACE_L (LocalVariable TK_COMMA)* LocalVariable TK_BRACE_R
+
+AssignmentStatement ::= AssignmentStatementSingle | AssignmentStatementMulti
+AssignmentStatementSingle ::= Expression AssignmentOp Expression
+AssignmentStatementMulti ::= (Expression TK_COMMA)* Expression TK_ASSIGN Expression
+
+PatternStatement ::= PatternCompOp? (PatternVariant TK_BIT_OR)* PatternVariant PatternGuard? InnerScope
+PatternCompOp ::= TK_EQ | TK_NE | TK_GE | TK_LE | TK_GT | TK_LT | KW_IS
+PatternGuard ::= TK_LOGICAL_AND Expression
+PatternVariant ::= PatternVariantTuple | PatternVariantDestructure | PatternVariantVariable | PatternVariantLiteral | PatternVariantElse  // | PatternVariantBoolMember
+PatternVariantTuple ::= TK_PAREN_L (PatternVariant TK_COMMA)* PatternVariant TK_PAREN_R
+PatternVariantDestructure ::= Type TK_BRACE_L (PatternVariant TK_COMMA)* PatternVariant TK_BRACE_R
+PatternVariantVariable ::= LocalVariableSingle
+PatternVariantLiteral ::= Literal
+PatternVariantElse ::= KW_ELSE
+// PatternVariantBoolMember ::=
+
+BinaryOp ::= TK_LOGICAL_AND | TK_LOGICAL_OR | TK_BIT_AND | TK_BIT_OR | TK_BIT_XOR | TK_BIT_SHIFT_LEFT | TK_BIT_SHIFT_RIGHT | TK_BIT_ROTATE_LEFT | TK_BIT_ROTATE_RIGHT | TK_EQ | TK_NE | TK_GE | TK_LE | TK_GT | TK_LT | TK_SS | TK_ADD | TK_SUB | TK_MUL | TK_DIV | TK_REM | TK_MOD | TK_POW | TK_COALESCE
+UnaryOp ::= KW_ASYNC
+PostfixOp ::= PostfixOpFunctionCall | PostfixOpMemberAccess | PostfixOpEarlyReturn
+PostfixOpFunctionCall ::= GenericArguments? FunctionCallArguments TK_VARIADIC?
+PostfixOpMemberAccess ::= TK_DOT (Identifier | LX_DEC_DIGITS)
+PostfixOpEarlyReturn ::= TK_QST
+AssignmentOp ::= TK_ASSIGN | TK_ADD_ASSIGN | TK_SUB_ASSIGN | TK_MUL_ASSIGN | TK_DIV_ASSIGN | TK_REM_ASSIGN | TK_MOD_ASSIGN | TK_POW_ASSIGN | TK_BIT_AND_ASSIGN | TK_BIT_OR_ASSIGN | TK_BIT_XOR_ASSIGN | TK_BIT_SHIFT_LEFT_ASSIGN | TK_BIT_SHIFT_RIGHT_ASSIGN | TK_BIT_ROTATE_LEFT_ASSIGN | TK_BIT_ROTATE_RIGHT_ASSIGN | TK_COALESCE_ASSIGN
+
+Convention ::= ConventionMut | ConventionRef | ConventionMov
+ConventionMut ::= TK_BIT_AND KW_MUT
+ConventionRef ::= TK_BIT_AND
+ConventionMov ::=
+
+ObjectInitialization ::= TypeSingle ObjectInitializerArguments
+ObjectInitializerArguments ::= TK_BRACE_L (ObjectInitializerArgument newline)* TK_BRACE_R
+ObjectInitializerArgument ::= ObjectInitializerArgumentNamed | ObjectInitializerArgumentNormal
+ObjectInitializerArgumentNamed ::= ObjectInitializerArgumentNamedKey TK_ASSIGN Expression
+ObjectInitializerArgumentNormal ::= Identifier
+ObjectInitializerArgumentNamedKey ::= Identifier | KW_ELSE | KW_SUP
+
+LambdaPrototype ::= Annotation* KW_FUN Identifier GenericParameters? FunctionParameters TK_ARROW_R Type LambdaCaptureBlock? WhereBlock? FunctionImplementation
+LambdaCaptureBlock ::= KW_WITH TK_BRACK_L (LambdaCaptureItem TK_COMMA)* LambdaCaptureItem TK_BRACK_R
+LambdaCaptureItem ::= LambdaCaptureItemNamed | LambdaCaptureItemNormal
+LambdaCaptureItemNamed ::= Identifier TK_ASSIGN Convention Expression
+LambdaCaptureItemNormal ::= Convention TK_VARIADIC? Expression
+
+Type ::= TypeUnion | TypeTuple | TypeSingle
+TypeSingle ::= TypeNamespace? TypeParts
+TypeTuple ::= TK_PAREN_L (Type TK_COMMA)* Type TK_PAREN_R
+TypeNonUnion ::= TypeTuple | TypeSingle
+TypeUnion ::= TypeNonUnion (TK_BIT_OR TypeNonUnion)*
+TypeNamespace ::= (Identifier TK_DOT)* Identifier
+TypeParts ::= TypePartFirst TypePart*
+TypePartFirst ::= GenericIdentifier | KW_SELF_TYPE
+TypePart ::= TK_DOT GenericIdentifier | LX_DEC_DIGITS
+
+Identifier ::= LX_IDENTIFIER
+UpperIdentifier ::= LX_UPPER_IDENTIFIER
+GenericIdentifier ::= UpperIdentifier GenericArguments?
+
+Literal ::= LiteralNumber | LiteralString | LiteralArray | LiteralTuple | LiteralRegex | LiteralBoolean
+LiteralNumber ::= LiteralNumberB10 | LiteralNumberB02 | LiteralNumberB16
+LiteralString ::= LX_DOUBLE_QUOTE_STR
+LiteralArray ::= LiteralArrayEmpty | LiteralArrayNonEmpty
+LiteralTuple ::= LiteralTuple0Items | LiteralTuple1Item | LiteralTupleNItems
+LiteralRegex ::= LX_REGEX
+LiteralBoolean ::= KW_TRUE | KW_FALSE
+
+LiteralNumberB10 ::= LiteralNumberB10Float | LiteralNumberB10Integer
+LiteralNumberB10Float ::= NumericPrefixOp LX_DEC_FLOAT NumericPostfixType
+LiteralNumberB10Integer ::= NumericPrefixOp LX_DEC_DIGITS NumericPostfixType
+LiteralNumberB02 ::= LX_BIN_DIGITS NumericPostfixType
+LiteralNumberB16 ::= LX_HEX_DIGITS NumericPostfixType
+NumericPrefixOp ::= TK_SUB | TK_ADD
+NumericPostfixType ::= "i8" | "i16" | "i32" | "i64" | "i128" | "i256" | "u8" | "u16" | "u32" | "u64" | "u128" | "u256" | "f8" | "f16" | "f32" | "f64" | "f128" | "f256"
+
+LiteralArrayEmpty ::= TK_BRACK_L Type TK_BRACK_R
+LiteralArrayNonEmpty ::= TK_BRACK_L (Expression TK_COMMA)* Expression TK_BRACK_R
+
+LiteralTuple0Items ::= TK_PAREN_L TK_PAREN_R
+LiteralTuple1Item ::= TK_PAREN_L Expression TK_COMMA TK_PAREN_R
+LiteralTupleNItems ::= TK_PAREN_L (Expression TK_COMMA)* Expression TK_PAREN_R
