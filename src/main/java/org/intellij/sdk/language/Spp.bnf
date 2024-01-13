@@ -128,23 +128,23 @@ ModuleMember ::= FunctionPrototype | ClassPrototype | SupPrototypeNormal | SupPr
 ModuleIdentifier ::= (Identifier TK_DOT)* Identifier
 
 ClassPrototype ::= Annotation* KW_CLS UpperIdentifier GenericParameters? WhereBlock? ClassImplementation
-ClassImplementation ::= TK_BRACE_L (ClassAttribute newline)* TK_BRACE_R
+ClassImplementation ::= TK_BRACE_L ClassAttribute* TK_BRACE_R
 ClassAttribute ::= Annotation* Identifier TK_COLON Type
 
 SupPrototypeNormal ::= KW_SUP GenericParameters? Type WhereBlock? SupImplementation
 SupPrototypeInheritance ::= KW_SUP GenericParameters? Type KW_ON Type WhereBlock? SupImplementation
-SupImplementation ::= TK_BRACE_L (SupMember newline)* TK_BRACE_R
+SupImplementation ::= TK_BRACE_L SupMember* TK_BRACE_R
 SupMember ::= SupMethodPrototype | SupTypedef
 SupMethodPrototype ::= FunctionPrototype
 SupTypedef ::= Annotation* TypedefStatement
 
 FunctionPrototype ::= Annotation* KW_FUN Identifier GenericParameters? FunctionParameters TK_ARROW_R Type WhereBlock? FunctionImplementation
-FunctionImplementation ::= TK_BRACE_L (Statement newline)* TK_BRACE_R
-FunctionCallArguments ::= TK_PAREN_L FunctionCallArgument* TK_PAREN_R
+FunctionImplementation ::= TK_BRACE_L Statement* TK_BRACE_R
+FunctionCallArguments ::= TK_PAREN_L ((FunctionCallArgument TK_COMMA)* FunctionCallArgument)? TK_PAREN_R
 FunctionCallArgument ::= FunctionCallArgumentNamed | FunctionCallArgumentNormal
 FunctionCallArgumentNamed ::= Identifier TK_ASSIGN Convention Expression
 FunctionCallArgumentNormal ::= Convention TK_VARIADIC? Expression
-FunctionParameters ::= TK_PAREN_L FunctionParameter* TK_PAREN_R
+FunctionParameters ::= TK_PAREN_L ((FunctionParameter TK_COMMA)* FunctionParameter)? TK_PAREN_R
 FunctionParameter ::= FunctionParameterVariadic | FunctionParameterOptional | FunctionParameterRequired | FunctionParameterSelf
 FunctionParameterVariadic ::= TK_VARIADIC FunctionParameterRequired
 FunctionParameterOptional ::= FunctionParameterRequired TK_ASSIGN Expression
@@ -175,23 +175,23 @@ PrimaryExpression ::= Literal | ObjectInitialization | LambdaPrototype | Parenth
 ParenthesizedExpression ::= TK_PAREN_L Expression TK_PAREN_R
 
 IfExpression ::= KW_IF Expression PatternCompOp? IfImplementation
-IfImplementation ::= TK_BRACE_L (PatternStatement newline)* TK_BRACE_R
+IfImplementation ::= TK_BRACE_L PatternStatement* TK_BRACE_R
 WhileExpression ::= KW_WHILE Expression InnerScope ResidualInnerScope?
 YieldExpression ::= KW_YIELD KW_WITH? Convention Expression
 WithExpression ::= KW_WITH WithExpressionLhsAlias Expression InnerScope
 WithExpressionLhsAlias ::= LocalVariable TK_ASSIGN
 
 ReturnStatement ::= KW_RET Expression
-InnerScope ::= TK_BRACE_L (Statement newline*) TK_BRACE_R
+InnerScope ::= TK_BRACE_L Statement TK_BRACE_R
 ResidualInnerScope ::= KW_ELSE InnerScope
 Statement ::= TypedefStatement | LetStatement | ReturnStatement | AssignmentStatement | Expression
 
 TypedefStatement ::= KW_USE GenericParameters? TypeNamespace? TypedefItem
 TypedefItem ::= TypedefItemSpecificItem | TypedefItemSpecificItems | TypedefItemAllItems
 TypedefItemSpecificItem ::= Type TypedefItemSpecificItemAlias?
-TypedefItemSpecificItems ::= TK_BRACE_L (TypedefItemSpecificItem newline)* TK_BRACE_R
+TypedefItemSpecificItems ::= TK_BRACE_L TypedefItemSpecificItem* TK_BRACE_R
 TypedefItemAllItems ::= TK_MUL
-TypedefItemSpecificItemAlias ::= TK_AS GenericIdentifier
+TypedefItemSpecificItemAlias ::= KW_AS GenericIdentifier
 
 LetStatement ::= LetStatementInitialized | LetStatementUninitialized
 LetStatementInitialized ::= KW_LET LocalVariable TK_ASSIGN Expression ResidualInnerScope?
@@ -230,13 +230,13 @@ ConventionRef ::= TK_BIT_AND
 ConventionMov ::=
 
 ObjectInitialization ::= TypeSingle ObjectInitializerArguments
-ObjectInitializerArguments ::= TK_BRACE_L (ObjectInitializerArgument newline)* TK_BRACE_R
+ObjectInitializerArguments ::= TK_BRACE_L ((ObjectInitializerArgument TK_COMMA)* ObjectInitializerArgument)? TK_BRACE_R
 ObjectInitializerArgument ::= ObjectInitializerArgumentNamed | ObjectInitializerArgumentNormal
 ObjectInitializerArgumentNamed ::= ObjectInitializerArgumentNamedKey TK_ASSIGN Expression
 ObjectInitializerArgumentNormal ::= Identifier
 ObjectInitializerArgumentNamedKey ::= Identifier | KW_ELSE | KW_SUP
 
-LambdaPrototype ::= Annotation* KW_FUN Identifier GenericParameters? FunctionParameters TK_ARROW_R Type LambdaCaptureBlock? WhereBlock? FunctionImplementation
+LambdaPrototype ::= Annotation* KW_FUN GenericParameters? FunctionParameters TK_ARROW_R Type LambdaCaptureBlock? WhereBlock? FunctionImplementation
 LambdaCaptureBlock ::= KW_WITH TK_BRACK_L (LambdaCaptureItem TK_COMMA)* LambdaCaptureItem TK_BRACK_R
 LambdaCaptureItem ::= LambdaCaptureItemNamed | LambdaCaptureItemNormal
 LambdaCaptureItemNamed ::= Identifier TK_ASSIGN Convention Expression
@@ -244,10 +244,10 @@ LambdaCaptureItemNormal ::= Convention TK_VARIADIC? Expression
 
 Type ::= TypeUnion | TypeTuple | TypeSingle
 TypeSingle ::= TypeNamespace? TypeParts
-TypeTuple ::= TK_PAREN_L (Type TK_COMMA)* Type TK_PAREN_R
+TypeTuple ::= TK_PAREN_L ((Type TK_COMMA)* Type)? TK_PAREN_R
 TypeNonUnion ::= TypeTuple | TypeSingle
 TypeUnion ::= TypeNonUnion (TK_BIT_OR TypeNonUnion)*
-TypeNamespace ::= (Identifier TK_DOT)* Identifier
+TypeNamespace ::= (Identifier TK_DOT)+
 TypeParts ::= TypePartFirst TypePart*
 TypePartFirst ::= GenericIdentifier | KW_SELF_TYPE
 TypePart ::= TK_DOT GenericIdentifier | LX_DEC_DIGITS

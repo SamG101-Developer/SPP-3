@@ -119,7 +119,6 @@ LX_DOUBLE_QUOTE_STR=\"[^\"]*\"
   "Self"                      { return KW_SELF_TYPE; }
   "on"                        { return KW_ON; }
   "async"                     { return KW_ASYNC; }
-  "TK_AS"                     { return TK_AS; }
 
   {LINE_COMMENT}              { return LINE_COMMENT; }
   {BLOCK_COMMENT}             { return BLOCK_COMMENT; }
